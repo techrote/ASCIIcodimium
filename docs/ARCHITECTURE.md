@@ -51,6 +51,8 @@ The initial bridge routes are mapped against `anomalyco/opencode/packages/client
 | GET /api/sessions/:id/permissions | GET /api/session/:id/permission | { data: PermissionRequest[] } |
 | POST /api/sessions/:id/permissions/:rid/reply | POST /api/session/:id/permission/:rid/reply | { decision: once / reject }, 204 |
 | GET /api/models/default | GET /api/model/default | { location, data: ModelInfo or null } |
+| GET /api/models | GET /api/model | { location, data: ModelInfo[] } |
+| POST /api/sessions/:id/model | POST /api/session/:id/model | { model: { id, providerID, variant? } }, 204 |
 | GET /api/agents | GET /api/agent | { location, data: AgentInfo[] } |
 | GET /api/events | GET /api/event | streamed SSE |
 

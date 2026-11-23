@@ -12,7 +12,7 @@ ASCIIcodimium is an ambitious experiment in graphical-quality terminal ergonomic
 - Correct **OpenCode 2** route mapping and explicit major-version handshake (`/api/info`, `/api/session`, `/api/event`). No OpenCode 1 SDK dependency.
 - Real session listing/creation; message transcript with tool summaries and reasoning folds; prompt admission, interrupt and limited human permission controls.
 - A local Node 22 bridge with crypto-random UI token, strict same-origin checks, loopback-only upstream, password-aware Basic authentication, request limits and a finite route allowlist.
-- SSE event relay with bounded refresh and fallback polling; session-model indicator and lightweight metrics.
+- SSE event relay with bounded refresh and fallback polling; a searchable, per-session model picker (up to 120 filtered choices on screen) and lightweight metrics.
 - A separate HTML editor/preview that executes JavaScript inside a restricted, opaque-origin Chromium iframe **without** authority over the coding agent; additional Notes and Metrics workspace tabs.
 - A Windows PowerShell launcher that starts an isolated temporary-password OpenCode 2 server, starts the bridge, and launches `asciiomium_live.exe --url` when available (ordinary-browser fallback otherwise).
 - Local Node built-in regression tests; no dependencies, expensive CI or automatic merges.
