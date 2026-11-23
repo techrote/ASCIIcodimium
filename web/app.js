@@ -306,7 +306,7 @@ el('new-session').addEventListener('click', async () => {
   try {
     const session = await api('sessions', 'POST');
     await refreshSessions(false);
-    await selectSession(session.id);
+    await selectSession((session.data || session).id);
     el('prompt').focus();
   } catch (error) { toast(error.message); }
   finally { button.disabled = false; }

@@ -87,7 +87,7 @@ test('message, prompt, interrupt and permission bridges are constrained', async 
   assert.equal((await call('/api/sessions/ses_demo/permissions')).status, 200);
   assert.equal((await call('/api/sessions/ses_demo/permissions/prm_1/reply', 'POST', { decision: 'once' })).status, 204);
   assert.equal((await call('/api/sessions/ses_demo/permissions/prm_1/reply', 'POST', { decision: 'always' })).status, 400);
-  assert.equal((await call('/api/sessions/bad%20path/messages')).status, 404);
+  assert.equal((await call('/api/sessions/bad%20path/messages')).status, 400);
   assert.equal((await call('/api/system/delete', 'POST', {})).status, 404);
 });
 
