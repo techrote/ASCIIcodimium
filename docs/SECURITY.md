@@ -6,7 +6,7 @@ ASCIIcodimium is unusually sensitive because its host application can ask a codi
 
 1. **OpenCode 2 service:** privileged local coding-agent process; its own permission policy remains authoritative. It is password protected. Only the loopback bridge possesses its temporary Basic password (or an explicitly configured alternative).
 2. **ASCIIcodimium bridge and shell:** locally served frontend with a random per-process UI token and strict origin/host checks; exposes only an explicit API allowlist rather than all OpenCode routes. Do not serve it on a LAN address.
-3. **Preview iframe:** a distinct sandboxed opaque origin without `allow-same-origin`, navigation or form privileges. Allows inline JS/CSS/DOM but no network connection. Preview is served from a temporary unguessable path with separate CSP and without the UI token.
+3. **Preview iframe:** a distinct sandboxed opaque origin without `allow-same-origin`, navigation or form privileges. Allows inline JS/CSS/DOM but no network connection. Preview is served from a temporary unguessable path with its own CSP `sandbox allow-scripts` response header (also effective on direct navigation) and without the UI token.
 4. **ASCIIomium CEF:** experimental browser engine. Current upstream prototype expressly sets `no_sandbox=true` and should be treated as **development-only, trusted-local-content only** until its sandbox architecture is corrected.
 5. **Real web browsing:** not implemented. Authenticated arbitrary websites, file/media access, external network and device APIs require separate hardened contexts rather than a permissive iframe in the privileged app shell.
 

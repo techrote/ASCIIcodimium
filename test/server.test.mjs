@@ -118,6 +118,7 @@ test('preview is an isolated CSP document and not a bridge token', async () => {
   const preview = await fetch(base + created.url);
   assert.equal(preview.status, 200);
   assert.match(preview.headers.get('content-security-policy'), /connect-src 'none'/);
+  assert.match(preview.headers.get('content-security-policy'), /sandbox allow-scripts/);
   assert.match(await preview.text(), /document.title/);
   assert.equal((await fetch(base + created.url + '/missing')).status, 404);
   assert.equal((await call('/api/preview', 'POST', { html: 'x'.repeat(160000) })).status, 400);

@@ -74,7 +74,7 @@
 &lt;/html&gt;</textarea>
           <div class="preview-label"><span class="little-label">SANDBOXED OUTPUT</span><span id="preview-status" class="dim tiny">Not rendered</span></div>
           <iframe id="preview" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Isolated HTML workspace preview"></iframe>
-          <p class="workspace-caution">Preview scripts cannot access the OpenCode bridge, parent DOM, or external network. Separate browser tabs for arbitrary external websites come later.</p>
+          <p class="workspace-caution">Preview scripts cannot access the parent DOM or authorised agent APIs. Use trusted, self-contained HTML only; hardened external browsing comes later.</p>
         </section>
         <section class="tab-content" data-view="notes" hidden><div class="little-label">SCRATCHPAD / LOCAL TO THIS PAGE</div><textarea id="notes" class="notes-editor" placeholder="Project ideas, temporary prompts, visual design notes…"></textarea><p class="workspace-caution">Ephemeral: contents disappear when this page closes. Persisted workspace documents are planned.</p></section>
         <section class="tab-content" data-view="metrics" hidden><div class="little-label">SESSION OBSERVABILITY</div><div class="metric-grid"><div><span>Messages</span><strong id="metric-messages">0</strong></div><div><span>Tools</span><strong id="metric-tools">0</strong></div><div><span>Events received</span><strong id="metric-events">0</strong></div><div><span>Cost reported</span><strong id="metric-cost">—</strong></div></div><div class="metric-explainer">OpenCode remains the source of truth. This dashboard does not estimate token spend or invent pricing.</div></section>
