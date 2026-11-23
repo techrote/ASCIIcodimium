@@ -88,6 +88,7 @@ async function readLimited(response) {
 export function createApp(options = {}) {
   const upstream = loopbackUpstream(options.upstream || process.env.AC_OPENCODE_URL || 'http://127.0.0.1:4096');
   const upstreamToken = options.upstreamToken ?? process.env.AC_OPENCODE_TOKEN;
+  const upstreamPassword = options.upstreamPassword ?? process.env.AC_OPENCODE_PASSWORD;
   const projectDirectory = options.projectDirectory ?? process.env.AC_PROJECT_DIR;
   const token = randomBytes(32).toString('base64url');
   const previews = new Map();
@@ -97,7 +98,8 @@ export function createApp(options = {}) {
   async function requestOpenCode(path, method = 'GET', payload, signal) {
     const headers = { Accept: 'application/json' };
     if (payload !== undefined) headers['Content-Type'] = 'application/json';
-    if (upstreamToken) headers.Authorization = 'Bearer ' + upstreamToken;
+    if (upstreamPassword) headers.Authorization = 'Basic ' + Buffer.from('opencode:' + upstreamPassword).toString('base64');
+    else if (upstreamToken) headers.Authorization = 'Bearer ' + upstreamToken;
     let response;
     try {
       response = await fetch(upstream + path, {
@@ -197,7 +199,8 @@ export function createApp(options = {}) {
         const controller = new AbortController();
         res.on('close', () => controller.abort());
         const headers = { Accept: 'text/event-stream' };
-        if (upstreamToken) headers.Authorization = 'Bearer ' + upstreamToken;
+        if (upstreamPassword) headers.Authorization = 'Basic ' + Buffer.from('opencode:' + upstreamPassword).toString('base64');
+    else if (upstreamToken) headers.Authorization = 'Bearer ' + upstreamToken;
         let stream;
         try {
           stream = await fetch(upstream + '/api/event', { headers, signal: controller.signal, redirect: 'error' });
