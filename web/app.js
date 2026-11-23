@@ -2,6 +2,7 @@ const el = (id) => document.getElementById(id);
 const token = document.querySelector('meta[name="ac-token"]').content;
 const state = {
   session: null, sessions: [], messages: [], permissions: [], current: null,
+  models: [], defaultModel: null,
   events: 0, working: false, requestVersion: 0, toastTimer: 0, refreshTimer: 0,
 };
 const headers = { 'X-ASCIIcodimium-Token': token };
@@ -69,6 +70,46 @@ async function refreshSessions(autoSelect = true) {
   if (autoSelect && !state.session && state.sessions.length) await selectSession(state.sessions[0].id);
 }
 
+function modelKey(value) {
+  if (!value) return '';
+  return String(value.providerID || '') + '/' + String(value.modelID || value.id || '');
+}
+
+function renderModelChoices() {
+  const picker = el('model-select');
+  const current = state.current?.model || state.defaultModel;
+  const currentKey = modelKey(current);
+  const term = el('model-filter').value.trim().toLowerCase();
+  picker.replaceChildren();
+  picker.disabled = !state.session;
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = !state.session ? 'Choose a session' : (!state.models.length ? 'No models found' : 'Select model…');
+  placeholder.disabled = true;
+  picker.append(placeholder);
+  const choices = state.models.filter((item) => item.enabled !== false)
+    .filter((item) => (String(item.providerID || '') + ' ' + String(item.name || '') + ' ' + String(item.modelID || '')).toLowerCase().includes(term))
+    .sort((a,b) => String(a.name || '').localeCompare(String(b.name || ''))).slice(0, 120);
+  let selected = false;
+  for (const item of choices) {
+    const option = document.createElement('option');
+    const model = { id: item.modelID || item.id, providerID: item.providerID };
+    option.value = JSON.stringify(model);
+    option.textContent = (item.providerID || 'provider') + ' / ' + (item.name || item.modelID || item.id);
+    if (modelKey(model) === currentKey) { option.selected = true; selected = true; }
+    picker.append(option);
+  }
+  if (current && !selected && current.providerID && current.id) {
+    const option = document.createElement('option');
+    option.value = JSON.stringify({ id: current.id, providerID: current.providerID, ...(current.variant ? { variant: current.variant } : {}) });
+    option.textContent = current.providerID + ' / ' + current.id + ' (current)';
+    option.selected = true;
+    picker.append(option);
+    selected = true;
+  }
+  if (!selected) placeholder.selected = true;
+}
+
 function setCurrent(session) {
   state.current = session;
   el('session-title').textContent = session?.title || (session ? 'Untitled session' : 'Select a session');
@@ -79,6 +120,7 @@ function setCurrent(session) {
   el('prompt-feedback').textContent = session ? 'OpenCode 2 session connected' : 'Awaiting session';
   const cost = typeof session?.cost === 'number' ? '$' + session.cost.toFixed(4) : '—';
   el('metric-cost').textContent = cost;
+  renderModelChoices();
 }
 
 async function selectSession(id) {
@@ -212,8 +254,16 @@ async function refreshAll() {
     if (chosen) setCurrent(chosen);
     try {
       const model = await api('models/default');
-      el('model-name').textContent = model.data?.name || 'MODEL: not configured';
-    } catch { el('model-name').textContent = 'MODEL: unavailable'; }
+      state.defaultModel = model.data || null;
+      if (!state.models.length) {
+        const catalog = await api('models');
+        state.models = dataOf(catalog);
+      }
+    } catch (error) {
+      state.models = [];
+      console.warn('Model catalog unavailable:', error.message);
+    }
+    renderModelChoices();
     if (state.session) await refreshConversation();
   } catch (error) {
     connect(false, 'OpenCode unavailable');
@@ -311,7 +361,7 @@ el('new-session').addEventListener('click', async () => {
   } catch (error) { toast(error.message); }
   finally { button.disabled = false; }
 });
-el('refresh-button').addEventListener('click', refreshAll);
+el('refresh-button').addEventListener('click', () => { state.models = []; refreshAll(); });
 el('prompt-form').addEventListener('submit', sendPrompt);
 el('prompt').addEventListener('keydown', (event) => {
   if (event.key === 'Enter' && event.ctrlKey) { event.preventDefault(); el('prompt-form').requestSubmit(); }
@@ -322,6 +372,22 @@ el('interrupt').addEventListener('click', async () => {
     await api('sessions/' + encodeURIComponent(state.session) + '/interrupt', 'POST');
     scheduleRefresh();
   } catch (error) { toast(error.message); }
+});
+el('model-filter').addEventListener('input', renderModelChoices);
+el('model-select').addEventListener('change', async (event) => {
+  if (!state.session || !event.target.value) return;
+  const sessionID = state.session;
+  const model = JSON.parse(event.target.value);
+  event.target.disabled = true;
+  try {
+    await api('sessions/' + encodeURIComponent(sessionID) + '/model', 'POST', { model });
+    if (state.session === sessionID && state.current) {
+      state.current.model = model;
+      setCurrent(state.current);
+      el('prompt-feedback').textContent = 'Model switched for this session';
+    }
+  } catch (error) { toast(error.message); renderModelChoices(); }
+  finally { renderModelChoices(); }
 });
 el('render-preview').addEventListener('click', renderPreview);
 el('workspace-width').addEventListener('input', (event) => {

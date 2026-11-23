@@ -33,6 +33,8 @@ before(async () => {
     if (req.url === '/api/session/ses_demo/interrupt') return reply(res, 200, { interrupted: true });
     if (req.url === '/api/session/ses_demo/permission/prm_1/reply') { res.writeHead(204); return res.end(); }
     if (req.url === '/api/model/default') return reply(res, 200, { data: { name: 'Local test model' } });
+    if (req.url === '/api/model') return reply(res, 200, { data: [{ id: 'test', modelID: 'test', providerID: 'mock', name: 'Local test', enabled: true }] });
+    if (req.url === '/api/session/ses_demo/model') { res.writeHead(204); return res.end(); }
     if (req.url === '/api/agent') return reply(res, 200, { data: [] });
     return reply(res, 404, { error: 'Unknown fake endpoint' });
   });
@@ -94,6 +96,14 @@ test('message, prompt, interrupt and permission bridges are constrained', async 
   assert.equal((await call('/api/sessions/ses_demo/permissions/prm_1/reply', 'POST', { decision: 'always' })).status, 400);
   assert.equal((await call('/api/sessions/bad%20path/messages')).status, 400);
   assert.equal((await call('/api/system/delete', 'POST', {})).status, 404);
+});
+
+test('model picker gateway uses v2 model routes and validates references', async () => {
+  const models = await (await call('/api/models')).json();
+  assert.equal(models.data[0].providerID, 'mock');
+  assert.equal((await call('/api/sessions/ses_demo/model', 'POST', { model: { id: 'test', providerID: 'mock' } })).status, 204);
+  assert.ok(observed.some((x) => x.url === '/api/session/ses_demo/model' && x.body.includes('"providerID":"mock"')));
+  assert.equal((await call('/api/sessions/ses_demo/model', 'POST', { model: { id: '', providerID: 'mock' } })).status, 400);
 });
 
 test('event stream relays the OpenCode 2 SSE payload', async () => {

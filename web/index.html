@@ -13,7 +13,7 @@
   <header class="chrome">
     <div class="brand"><span class="logo">A<span class="logo-notch">/</span>C</span><div><strong>ASCIIcodimium</strong><small>OpenCode 2 × ASCIIomium</small></div></div>
     <div class="header-center"><span id="connection-led" class="led" aria-hidden="true"></span><span id="connection-text" role="status">Connecting to OpenCode 2</span></div>
-    <div class="header-controls"><span class="chip" id="model-name">MODEL: —</span><button id="refresh-button" title="Refresh sessions">↻ Refresh</button></div>
+    <div class="header-controls"><div class="model-picker"><label class="sr-only" for="model-filter">Find a model</label><input type="search" id="model-filter" placeholder="Filter models…" aria-label="Filter available models"><label class="sr-only" for="model-select">Select active session model</label><select id="model-select" aria-label="OpenCode session model" disabled><option value="">Choose a session</option></select></div><button id="refresh-button" title="Refresh sessions">↻ Refresh</button></div>
   </header>
   <div class="workbench" id="workbench">
     <aside class="session-panel" aria-label="Sessions">

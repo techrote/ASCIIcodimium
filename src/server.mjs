@@ -242,13 +242,27 @@ export function createApp(options = {}) {
         path = '/api/session';
         body = projectDirectory ? { location: { directory: projectDirectory } } : {};
       } else if (pathname === '/api/agents' && method === 'GET') path = '/api/agent';
+      else if (pathname === '/api/models' && method === 'GET') path = '/api/model';
       else if (pathname === '/api/models/default' && method === 'GET') path = '/api/model/default';
       else {
-        const match = pathname.match(/^\/api\/sessions\/([^/]+)\/(messages|prompt|interrupt|permissions)$/);
+        const match = pathname.match(/^\/api\/sessions\/([^/]+)\/(messages|prompt|interrupt|permissions|model)$/);
         const reply = pathname.match(/^\/api\/sessions\/([^/]+)\/permissions\/([^/]+)\/reply$/);
         if (match) {
           const id = validID(match[1]);
           if (match[2] === 'messages' && method === 'GET') path = '/api/session/' + id + '/message?limit=100';
+          if (match[2] === 'model' && method === 'POST') {
+            const input = await readJsonBody(req);
+            const model = input.model;
+            if (!model || typeof model !== 'object' ||
+                typeof model.id !== 'string' || !model.id || model.id.length > 200 ||
+                typeof model.providerID !== 'string' || !model.providerID || model.providerID.length > 200 ||
+                (model.variant !== undefined && (typeof model.variant !== 'string' || model.variant.length > 100))) {
+              fail(400, 'Expected model { id, providerID, variant? }');
+            }
+            path = '/api/session/' + id + '/model';
+            body = { model: { id: model.id, providerID: model.providerID } };
+            if (model.variant) body.model.variant = model.variant;
+          }
           if (match[2] === 'permissions' && method === 'GET') path = '/api/session/' + id + '/permission';
           if (match[2] === 'prompt' && method === 'POST') {
             const input = await readJsonBody(req);
