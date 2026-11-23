@@ -1,0 +1,13 @@
+{
+  "name": "asciicodimium",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "dev": "node --watch src/server.mjs",
+    "test": "node --test"
+  },
+  "description": "OpenCode 2 workbench rendered by ASCIIomium in a terminal"
+}
