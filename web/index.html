@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="ac-token" content="@@BOOTSTRAP_TOKEN@@">
+  <title>ASCIIcodimium — OpenCode 2 Workbench</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script defer type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="chrome">
+    <div class="brand"><span class="logo">A<span class="logo-notch">/</span>C</span><div><strong>ASCIIcodimium</strong><small>OpenCode 2 × ASCIIomium</small></div></div>
+    <div class="header-center"><span id="connection-led" class="led" aria-hidden="true"></span><span id="connection-text" role="status">Connecting to OpenCode 2</span></div>
+    <div class="header-controls"><span class="chip" id="model-name">MODEL: —</span><button id="refresh-button" title="Refresh sessions">↻ Refresh</button></div>
+  </header>
+  <div class="workbench" id="workbench">
+    <aside class="session-panel" aria-label="Sessions">
+      <div class="panel-heading"><div><p class="eyebrow">NAVIGATOR</p><h2>Sessions</h2></div><button class="primary compact" id="new-session">+ New</button></div>
+      <div class="session-list" id="sessions" aria-label="OpenCode sessions"><div class="placeholder">Waiting for OpenCode…</div></div>
+      <div class="session-footer"><div class="little-label">RUNTIME</div><div id="runtime-version" class="mono dim">OpenCode 2 · —</div><div class="dim tiny">Sessions remain owned by OpenCode, not this UI.</div></div>
+    </aside>
+
+    <main class="chat-panel" aria-label="Coding agent">
+      <div class="panel-heading chat-heading"><div><p class="eyebrow">AGENT / CONVERSATION</p><h2 id="session-title">Select a session</h2></div><span id="session-state" class="chip">IDLE</span></div>
+      <div class="conversation-scroll" id="messages" role="log" aria-live="polite" aria-relevant="additions text">
+        <div class="empty-state"><span class="empty-symbol">⌘</span><h3>Agent runtime, uninterrupted.</h3><p>Select a session or create a new one. OpenCode 2 handles the execution; ASCIIcodimium handles the experience.</p></div>
+      </div>
+      <section id="permissions" class="permissions" aria-label="Pending tool permissions" hidden></section>
+      <div class="composer">
+        <div class="composer-meta"><span class="eyebrow">PROMPT</span><span class="hint">Ctrl + Enter to send</span></div>
+        <form id="prompt-form"><label class="sr-only" for="prompt">Prompt to OpenCode</label><textarea id="prompt" rows="3" placeholder="Ask OpenCode to inspect, change or build something…" disabled></textarea>
+          <div class="composer-actions"><span id="prompt-feedback" class="dim tiny">Awaiting session</span><div><button id="interrupt" type="button" disabled>■ Stop</button><button id="send" class="primary" type="submit" disabled>Send ↗</button></div></div>
+        </form>
+      </div>
+    </main>
+
+    <aside class="workspace-panel" aria-label="Web workspace">
+      <div class="panel-heading"><div><p class="eyebrow">CHROMIUM / WORKSPACE</p><h2>Web surfaces</h2></div><span class="chip accent-chip">LIVE</span></div>
+      <div class="workspace-toolbar"><div role="tablist" aria-label="Workspace views" class="tab-bar"><button role="tab" class="selected" aria-selected="true" data-tab="preview">Preview</button><button role="tab" aria-selected="false" data-tab="notes">Notes</button><button role="tab" aria-selected="false" data-tab="metrics">Metrics</button></div>
+        <label class="width-picker" for="workspace-width" title="Resize workspace">↔<input type="range" id="workspace-width" min="300" max="900" step="20" value="430" aria-label="Workspace width"></label></div>
+      <div class="workspace-body">
+        <section class="tab-content" data-view="preview">
+          <div class="preview-label"><div><span class="little-label">DOCUMENT SOURCE</span><p class="dim tiny">HTML, CSS and JavaScript in an isolated document</p></div><button id="render-preview" class="primary compact">▶ Render</button></div>
+          <label class="sr-only" for="html-editor">HTML to render in isolated preview</label>
+          <textarea id="html-editor" spellcheck="false" class="code-editor">&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;style&gt;
+    body { margin:0; padding:24px; color:#dbeaff;
+      background:#0c1826; font:15px system-ui; }
+    h1 { font-size:22px; }
+    .track { margin:12px 0; background:#182e3d;
+      border-radius:8px; overflow:hidden; }
+    .bar { height:16px; width:65%; background:
+      linear-gradient(90deg,#33d4bd,#729cf9); }
+    button { background:#33d4bd; color:#002c2d;
+      border:0; border-radius:6px; padding:9px 13px; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Your own workbench canvas&lt;/h1&gt;
+  &lt;p&gt;A real browser DOM, inside a terminal.&lt;/p&gt;
+  &lt;div class="track"&gt;&lt;div class="bar" id="bar"&gt;&lt;/div&gt;&lt;/div&gt;
+  &lt;button id="change"&gt;Randomise&lt;/button&gt;
+  &lt;script&gt;
+    document.getElementById('change').onclick = () =&gt; {
+      document.getElementById('bar').style.width =
+        (10 + Math.floor(Math.random()*85)) + '%';
+    };
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</textarea>
+          <div class="preview-label"><span class="little-label">SANDBOXED OUTPUT</span><span id="preview-status" class="dim tiny">Not rendered</span></div>
+          <iframe id="preview" sandbox="allow-scripts" referrerpolicy="no-referrer" title="Isolated HTML workspace preview"></iframe>
+          <p class="workspace-caution">Preview scripts cannot access the OpenCode bridge, parent DOM, or external network. Separate browser tabs for arbitrary external websites come later.</p>
+        </section>
+        <section class="tab-content" data-view="notes" hidden><div class="little-label">SCRATCHPAD / LOCAL TO THIS PAGE</div><textarea id="notes" class="notes-editor" placeholder="Project ideas, temporary prompts, visual design notes…"></textarea><p class="workspace-caution">Ephemeral: contents disappear when this page closes. Persisted workspace documents are planned.</p></section>
+        <section class="tab-content" data-view="metrics" hidden><div class="little-label">SESSION OBSERVABILITY</div><div class="metric-grid"><div><span>Messages</span><strong id="metric-messages">0</strong></div><div><span>Tools</span><strong id="metric-tools">0</strong></div><div><span>Events received</span><strong id="metric-events">0</strong></div><div><span>Cost reported</span><strong id="metric-cost">—</strong></div></div><div class="metric-explainer">OpenCode remains the source of truth. This dashboard does not estimate token spend or invent pricing.</div></section>
+      </div>
+    </aside>
+  </div>
+  <div id="toast" role="alert" aria-live="assertive" hidden></div>
+</body>
+</html>
