@@ -24,6 +24,11 @@ before(async () => {
     if (req.url === '/api/session/ses_demo/message') return reply(res, 200, { data: [] });
     if (req.url === '/api/session/ses_demo/message?limit=100') return reply(res, 200, { data: [], cursor: {} });
     if (req.url === '/api/session/ses_demo/permission') return reply(res, 200, { data: [] });
+    if (req.url === '/api/event') {
+      res.writeHead(200, { 'Content-Type': 'text/event-stream' });
+      res.end('data: {"type":"session.created","data":{"sessionID":"ses_demo"}}' + String.fromCharCode(10, 10));
+      return;
+    }
     if (req.url === '/api/session/ses_demo/prompt') return reply(res, 200, { data: { id: 'msg_123' } });
     if (req.url === '/api/session/ses_demo/interrupt') return reply(res, 200, { interrupted: true });
     if (req.url === '/api/session/ses_demo/permission/prm_1/reply') { res.writeHead(204); return res.end(); }
@@ -89,6 +94,13 @@ test('message, prompt, interrupt and permission bridges are constrained', async 
   assert.equal((await call('/api/sessions/ses_demo/permissions/prm_1/reply', 'POST', { decision: 'always' })).status, 400);
   assert.equal((await call('/api/sessions/bad%20path/messages')).status, 400);
   assert.equal((await call('/api/system/delete', 'POST', {})).status, 404);
+});
+
+test('event stream relays the OpenCode 2 SSE payload', async () => {
+  const response = await call('/api/events');
+  assert.equal(response.status, 200);
+  const payload = await response.text();
+  assert.match(payload, /session.created/);
 });
 
 test('preview is an isolated CSP document and not a bridge token', async () => {

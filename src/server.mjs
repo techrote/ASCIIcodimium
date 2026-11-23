@@ -217,7 +217,15 @@ export function createApp(options = {}) {
         try {
           for await (const chunk of stream.body) {
             if (controller.signal.aborted || res.destroyed) break;
-            if (!res.write(chunk)) await new Promise((done) => res.once('drain', done));
+            if (!res.write(chunk)) await new Promise((done) => {
+              const release = () => {
+                res.off('drain', release);
+                res.off('close', release);
+                done();
+              };
+              res.once('drain', release);
+              res.once('close', release);
+            });
           }
         } catch (error) {
           if (!controller.signal.aborted) console.error('Event relay closed:', error.message);
